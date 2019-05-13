@@ -21,8 +21,15 @@ module SamlIdp
         version, choose = "2.0", "persistent" unless choose
         build(version, choose)
       else
-        choose = list.first || "persistent"
-        build("2.0", choose)
+        choose = list.first || ["persistent"]
+        version = case choose.first.to_s.underscore
+                  when 'email_address'
+                    '1.1'
+                  else
+                    '2.0'
+                  end
+
+        build(version, choose)
       end
     end
 
