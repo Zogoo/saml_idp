@@ -105,7 +105,9 @@ module SamlIdp
         return false
       end
 
-      if !service_provider.acceptable_response_hosts.include?(response_host)
+      # Validate acs only if it is specified
+      # If no acs given, it will take value from metadata, nothing to validate
+      if response_host && !service_provider.acceptable_response_hosts.include?(response_host)
         log "#{service_provider.acceptable_response_hosts} compare to #{response_host}"
         log "No acceptable AssertionConsumerServiceURL, either configure them via config.service_provider.response_hosts or match to your metadata_url host"
         return false
