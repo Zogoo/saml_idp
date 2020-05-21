@@ -74,7 +74,7 @@ module SamlIdp
               asserted_attributes.each do |friendly_name, attrs|
                 attrs = (attrs || {}).with_indifferent_access
                 attr_statement.Attribute Name: attrs[:name] || friendly_name,
-                  NameFormat: attrs[:name_format] || Saml::XML::Namespaces::Formats::Attr::URI,
+                  NameFormat: attrs[:name_format] || attrs[:nameFormat] || Saml::XML::Namespaces::Formats::Attr::URI,
                   FriendlyName: friendly_name.to_s do |attr|
                     values = get_values_for friendly_name, attrs[:getter]
                     values.each do |val|
