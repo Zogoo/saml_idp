@@ -1,8 +1,9 @@
 language: ruby
 rvm:
-  - 2.2
-  - 2.3
   - 2.4
+  - 2.5
+  - 2.6
+  - 2.7
   - ruby-head
 gemfile:
   - gemfiles/rails_3.2.gemfile
@@ -11,6 +12,8 @@ gemfile:
   - gemfiles/rails_4.2.gemfile
   - gemfiles/rails_5.0.gemfile
   - gemfiles/rails_5.1.gemfile
+  - gemfiles/rails_5.2.gemfile
+  - gemfiles/rails_6.0.gemfile
   - gemfiles/rails_dev.gemfile
 matrix:
   exclude:
@@ -18,6 +21,24 @@ matrix:
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: 2.4
       gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.4
+      gemfile: gemfiles/rails_6.0.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_4.0.gemfile
+    - rvm: 2.5
+      gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.6
+      gemfile: gemfiles/rails_4.0.gemfile
+    - rvm: 2.6
+      gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.7
+      gemfile: gemfiles/rails_3.2.gemfile
+    - rvm: 2.7
+      gemfile: gemfiles/rails_4.0.gemfile
+    - rvm: 2.7
+      gemfile: gemfiles/rails_4.1.gemfile
+    - rvm: 2.7
+      gemfile: gemfiles/rails_4.2.gemfile
     - rvm: ruby-head
       gemfile: gemfiles/rails_4.0.gemfile
     - rvm: ruby-head
@@ -25,16 +46,3 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - gemfile: gemfiles/rails_dev.gemfile
-    - rvm: 2.4
-      gemfile: gemfiles/rails_3.2.gemfile
-    - rvm: 2.4
-      gemfile: gemfiles/rails_4.2.gemfile
-before_install:
-  # https://docs.travis-ci.com/user/languages/ruby/#bundler
-  - RUBY_VERSION=$(ruby -v | grep -o -E '[0-9]\.[0-9]' | tr -d '.')
-  # Bundler for greater than Ruby 2.3 version
-  - if [ $RUBY_VERSION -gt 23 ]; then gem update --system; fi
-  - if [ $RUBY_VERSION -gt 23 ]; then gem install bundler -v '>= 2'; fi
-  # Bundler for less than Ruby 2.3 version or Rails 4.2
-  - if [ $RUBY_VERSION -le 23 ]; then gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true; fi
-  - if [ $RUBY_VERSION -le 23 ]; then gem install bundler -v '< 2'; fi
