@@ -72,6 +72,23 @@ end
 
 ## Configuration
 
+#### Singed assertions and Signed Response
+
+By default SAML Assertion will be signed with an algorithm which defined to `config.algorithm`, because SAML assertions contain secure information used for authentication such as NameID.
+Besides that, signing assertions could be optional and can be defined with `config.signed_assertion` option. Setting this configuration flag to `false` will add raw assertions on the response instead of signed ones. If the response is encrypted the `config.signed_assertion` will be ignored and all assertions will be signed.
+
+Signing SAML Response is optional, but some security perspective SP services might require Response message itself must be signed.
+For that, you can enable it with `config.signed_message` option. [More about SAML spec](https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf#page=68)
+
+#### Signing algorithm
+
+Following algorithms you can set in your response signing algorithm
+:sha1 - RSA-SHA1 default value but not recommended to production environment
+Highly recommended to use one of following algorithm, suit with your computing power.
+:sha256 - RSA-SHA256
+:sha384 - RSA-SHA384
+:sha512 - RSA-SHA512
+
 Be sure to load a file like this during your app initialization:
 
 ```ruby
@@ -91,7 +108,7 @@ KEY DATA
 CERT
 
   # config.password = "secret_key_password"
-  # config.algorithm = :sha256
+  # config.algorithm = :sha256                                    # Default: sha1 only for development.
   # config.organization_name = "Your Organization"
   # config.organization_url = "http://example.com"
   # config.base_saml_location = "#{base}/saml"
@@ -101,6 +118,8 @@ CERT
   # config.attribute_service_location = "#{base}/saml/attributes"
   # config.single_service_post_location = "#{base}/saml/auth"
   # config.session_expiry = 86400                                 # Default: 0 which means never
+  # config.signed_message = true                                  # Default: false which means unsigned SAML Response
+  # config.non_signed_assertion = true                            # Default: false which means signed  assertions on the SAML Response
 
   # Principal (e.g. User) is passed in when you `encode_response`
   #

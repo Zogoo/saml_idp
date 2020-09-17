@@ -23,6 +23,8 @@ describe SamlIdp::Controller do
 
   context "SAML Responses" do
     let(:principal) { double email_address: "foo@example.com" }
+    let(:non_signed_assertion) { true }
+    let(:signed_message) { true }
     let (:encryption_opts) do
       {
         cert: SamlIdp::Default::X509_CERTIFICATE,
@@ -89,6 +91,35 @@ describe SamlIdp::Controller do
           expect(response.decrypted_document.to_s).to match("foo@example.com")
           expect(response.name_id).to eq("foo@example.com")
           expect(response.issuers.first).to eq("http://example.com")
+          expect(response.is_valid?).to be_truthy
+        end
+
+        it "should not sign SAML Response assertion" do
+          saml_response = encode_response(principal, signed_message: signed_message, non_signed_assertion: non_signed_assertion)
+          response = OneLogin::RubySaml::Response.new(saml_response)
+          expect(response.name_id).to eq("foo@example.com")
+          expect(response.issuers.first).to eq("http://example.com")
+
+          expect(
+            Nokogiri::XML(response.response).at_xpath(
+            "//p:Response//a:Assertion",
+            {
+              "p" => "urn:oasis:names:tc:SAML:2.0:protocol",
+              "a" => "urn:oasis:names:tc:SAML:2.0:assertion"
+            }
+          )).to be_present
+
+          expect(
+            Nokogiri::XML(response.response).at_xpath(
+            "//p:Response//Assertion//ds:Signature",
+            {
+              "p" => "urn:oasis:names:tc:SAML:2.0:protocol",
+              "a" => "urn:oasis:names:tc:SAML:2.0:assertion",
+              "ds" => "http://www.w3.org/2000/09/xmldsig#"
+            }
+          )).to_not be_present
+
+          response.settings = saml_settings
           expect(response.is_valid?).to be_truthy
         end
       end

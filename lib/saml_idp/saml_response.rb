@@ -2,7 +2,6 @@ require 'saml_idp/assertion_builder'
 require 'saml_idp/response_builder'
 module SamlIdp
   class SamlResponse
-    attr_accessor :assertion_with_signature
     attr_accessor :reference_id
     attr_accessor :response_id
     attr_accessor :issuer_uri
@@ -18,6 +17,7 @@ module SamlIdp
     attr_accessor :encryption_opts
     attr_accessor :session_expiry
     attr_accessor :signed_message_opts
+    attr_accessor :non_signed_assertion_opts
 
     def initialize(reference_id,
           response_id,
@@ -31,7 +31,8 @@ module SamlIdp
           expiry=60*60,
           encryption_opts=nil,
           session_expiry=0,
-          signed_message_opts
+          signed_message_opts=false,
+          non_signed_assertion_opts=false
           )
       self.reference_id = reference_id
       self.response_id = response_id
@@ -48,6 +49,7 @@ module SamlIdp
       self.encryption_opts = encryption_opts
       self.session_expiry = session_expiry
       self.signed_message_opts = signed_message_opts
+      self.non_signed_assertion_opts = non_signed_assertion_opts
     end
 
     def build
@@ -57,6 +59,8 @@ module SamlIdp
     def signed_assertion
       if encryption_opts
         assertion_builder.encrypt(sign: true)
+      elsif non_signed_assertion_opts
+        assertion_builder.raw
       else
         assertion_builder.signed
       end
