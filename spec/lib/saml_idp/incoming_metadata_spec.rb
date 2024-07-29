@@ -109,9 +109,10 @@ module SamlIdp
       expect(metadata.unspecified_certificate).to eq('')
     end
 
-    it 'should properly set signing_certificate when present' do
+    it 'should properly set signing_certificate when present but not unspecified_certificate' do
       metadata = SamlIdp::IncomingMetadata.new(metadata_6)
       expect(metadata.signing_certificate).to eq('MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmw6vGr...')
+      expect(metadata.unspecified_certificate).to eq('')
     end
 
     it 'should return empty signing_certificate when not present' do
@@ -119,9 +120,10 @@ module SamlIdp
       expect(metadata.signing_certificate).to eq('')
     end
 
-    it 'should properly set encryption_certificate when present' do
+    it 'should properly set encryption_certificate when present but not unspecified_certificate' do
       metadata = SamlIdp::IncomingMetadata.new(metadata_7)
       expect(metadata.encryption_certificate).to eq('MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1dX3Gr...')
+      expect(metadata.unspecified_certificate).to eq('')
     end
 
     it 'should return empty encryption_certificate when not present' do

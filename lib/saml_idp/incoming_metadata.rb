@@ -65,7 +65,7 @@ module SamlIdp
 
     def unspecified_certificate
       xpath(
-        "//md:SPSSODescriptor/md:KeyDescriptor/ds:KeyInfo/ds:X509Data/ds:X509Certificate",
+        "//md:SPSSODescriptor/md:KeyDescriptor[not(@use)]/ds:KeyInfo/ds:X509Data/ds:X509Certificate",
         ds: signature_namespace,
         md: metadata_namespace
       ).first.try(:content).to_s
