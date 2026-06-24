@@ -37,7 +37,7 @@ module SamlIdp
       self.service_provider.persisted_metadata_getter = ->(id, service_provider) {  }
       self.session_expiry = 0
       self.subject_expiry = 15 * 60
-      self.not_before_offset = 5
+      self.not_before_offset = 60
       self.attributes = {}
       self.logger = (defined?(::Rails) && Rails.respond_to?(:logger)) ? Rails.logger : ->(msg) { puts msg }
     end
