@@ -19,6 +19,8 @@ module SamlIdp
     attr_accessor :expiry
     attr_accessor :encryption_opts
     attr_accessor :session_expiry
+    attr_accessor :subject_expiry
+    attr_accessor :not_before_offset
     attr_accessor :name_id_formats_opts
     attr_accessor :asserted_attributes_opts
     attr_accessor :signed_message_opts
@@ -41,6 +43,8 @@ module SamlIdp
       expiry: 60 * 60,
       encryption_opts: nil,
       session_expiry: 0,
+      subject_expiry: nil,
+      not_before_offset: nil,
       name_id_formats_opts: nil,
       asserted_attributes_opts: nil,
       signed_message_opts: false,
@@ -63,6 +67,8 @@ module SamlIdp
       self.expiry = expiry
       self.encryption_opts = encryption_opts
       self.session_expiry = session_expiry
+      self.subject_expiry = subject_expiry
+      self.not_before_offset = not_before_offset
       self.signed_message_opts = signed_message_opts
       self.name_id_formats_opts = name_id_formats_opts
       self.asserted_attributes_opts = asserted_attributes_opts
@@ -127,6 +133,8 @@ module SamlIdp
           expiry: expiry,
           encryption_opts: encryption_opts,
           session_expiry: session_expiry,
+          subject_expiry: subject_expiry,
+          not_before_offset: not_before_offset,
           name_id_formats_opts: name_id_formats_opts,
           asserted_attributes_opts: asserted_attributes_opts
         )

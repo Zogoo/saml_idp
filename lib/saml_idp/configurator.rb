@@ -22,6 +22,8 @@ module SamlIdp
     attr_accessor :service_provider
     attr_accessor :assertion_consumer_service_hosts
     attr_accessor :session_expiry
+    attr_accessor :subject_expiry
+    attr_accessor :not_before_offset
     attr_accessor :logger
 
     def initialize
@@ -34,6 +36,8 @@ module SamlIdp
       self.service_provider.metadata_persister = ->(id, settings) {  }
       self.service_provider.persisted_metadata_getter = ->(id, service_provider) {  }
       self.session_expiry = 0
+      self.subject_expiry = 15 * 60
+      self.not_before_offset = 5
       self.attributes = {}
       self.logger = (defined?(::Rails) && Rails.respond_to?(:logger)) ? Rails.logger : ->(msg) { puts msg }
     end
