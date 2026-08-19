@@ -12,9 +12,17 @@ class SamlFlow
   MAX_HOPS = 10
 
   Page = Struct.new(:status, :headers, :body, :uri, keyword_init: true) do
-    def json = JSON.parse(body)
-    def doc  = Nokogiri::HTML(body)
-    def location = headers['location'] || headers['Location']
+    def json
+      JSON.parse(body)
+    end
+
+    def doc
+      Nokogiri::HTML(body)
+    end
+
+    def location
+      headers['location'] || headers['Location']
+    end
   end
 
   def initialize(app)
@@ -138,5 +146,7 @@ class SamlFlow
     uri
   end
 
-  def absolute(location, base) = URI.join(base.to_s, location.to_s)
+  def absolute(location, base)
+    URI.join(base.to_s, location.to_s)
+  end
 end

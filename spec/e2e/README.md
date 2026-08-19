@@ -23,7 +23,16 @@ make test          # everything
 make e2e           # end-to-end flows only
 make docker-test   # everything, in Docker (what CI runs)
 make docker-e2e
+make syntax        # parse everything under the oldest supported Ruby
 ```
+
+### Ruby version floor
+
+`saml_idp.gemspec` declares `required_ruby_version >= 2.5` and the CI matrix
+runs Ruby 2.5 through 3.3. This suite runs on all of them, so it must avoid
+Ruby 3.0+ syntax — endless method definitions especially — until the floor is
+raised. `make syntax` catches that locally; verified green on
+Ruby 2.5 / Rails 5.2, Ruby 2.7 / Rails 6.1 and Ruby 3.3 / Rails 7.2.
 
 ## Driving scenarios
 
