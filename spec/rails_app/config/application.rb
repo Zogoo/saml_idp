@@ -38,6 +38,14 @@ module RailsApp
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = "utf-8"
 
+    # The e2e suite addresses the IdP and the SP on distinct hosts so that
+    # Destination and ACS-URL validation stay meaningful. Rails 6+ blocks
+    # unknown hosts by default.
+    config.hosts.clear if config.respond_to?(:hosts)
+    if config.respond_to?(:host_authorization=)
+      config.host_authorization = { exclude: ->(_request) { true } }
+    end
+
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
