@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <body onload="document.forms[0].submit();" style="visibility:hidden;">
+    <%= form_tag(@destination) do %>
+      <% @fields.each do |name, value| %>
+        <%= hidden_field_tag(name, value) %>
+      <% end %>
+      <%= submit_tag "Submit" %>
+    <% end %>
+  </body>
+</html>
