@@ -70,9 +70,13 @@ module Saml
         !!xpath("//ds:Signature", ds: signature_namespace).first
       end
 
-      def valid_signature?(certificate, fingerprint)
+      # `options[:signed_element_id]` names the element the caller consumes, so
+      # that a signature over some other element in the document cannot be
+      # presented as a signature over that one. See
+      # SamlIdp::XMLSecurity::SignedDocument#validate.
+      def valid_signature?(certificate, fingerprint, options = {})
         signed? &&
-          signed_document.validate(certificate, fingerprint, :soft)
+          signed_document.validate(certificate, fingerprint, :soft, options)
       end
 
       def signed_document

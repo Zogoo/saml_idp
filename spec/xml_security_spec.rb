@@ -2,30 +2,38 @@ require 'spec_helper'
 require 'xml_security'
 
 module SamlIdp
+  # These fixtures are SAML Responses whose signature covers the nested
+  # <Assertion>, so the element under test is the assertion - the caller has to
+  # say so, exactly as SamlIdp::Request says "the message I read is the root".
+  def self.assertion_id(document)
+    REXML::XPath.first(document, "//*[local-name()='Assertion']").attribute("ID").value
+  end
+
   describe XMLSecurity, security: true do
     let(:document) { XMLSecurity::SignedDocument.new(Base64.decode64(response_document)) }
     let(:base64cert) { document.elements["//ds:X509Certificate"].text }
+    let(:signed_element) { { signed_element_id: SamlIdp.assertion_id(document) } }
 
     it "it run validate without throwing NS related exceptions" do
-      expect(document.validate_doc(base64cert, true)).to be_falsey
+      expect(document.validate_doc(base64cert, true, signed_element)).to be_falsey
     end
 
     it "it run validate with throwing NS related exceptions" do
-      expect { document.validate_doc(base64cert, false) }.to raise_error(SamlIdp::XMLSecurity::SignedDocument::ValidationError)
+      expect { document.validate_doc(base64cert, false, signed_element) }.to raise_error(SamlIdp::XMLSecurity::SignedDocument::ValidationError)
     end
 
     it "not raise an error when softly validating the document multiple times" do
-      expect { 2.times { document.validate_doc(base64cert, true) } }.to_not raise_error
+      expect { 2.times { document.validate_doc(base64cert, true, signed_element) } }.to_not raise_error
     end
 
     it "it raise Fingerprint mismatch" do
-      expect { document.validate("", "no:fi:ng:er:pr:in:t", false) }.to(
+      expect { document.validate("", "no:fi:ng:er:pr:in:t", false, signed_element) }.to(
         raise_error(SamlIdp::XMLSecurity::SignedDocument::ValidationError, "Fingerprint mismatch")
       )
     end
 
     it "it raise Digest mismatch" do
-      expect { document.validate_doc(base64cert, false) }.to(
+      expect { document.validate_doc(base64cert, false, signed_element) }.to(
         raise_error(SamlIdp::XMLSecurity::SignedDocument::ValidationError, "Digest mismatch")
       )
     end
@@ -36,7 +44,7 @@ module SamlIdp
                     "<ds:DigestValue>b9xsAXLsynugg3Wc1CI3kpWku+0=</ds:DigestValue>")
       document = XMLSecurity::SignedDocument.new(response)
       base64cert = document.elements["//ds:X509Certificate"].text
-      expect { document.validate_doc(base64cert, false) }.to(
+      expect { document.validate_doc(base64cert, false, signed_element_id: SamlIdp.assertion_id(document)) }.to(
         raise_error(SamlIdp::XMLSecurity::SignedDocument::ValidationError, "Key validation error")
       )
     end
@@ -45,7 +53,7 @@ module SamlIdp
       response = Base64.decode64(response_document)
       response.sub!(/<ds:X509Certificate>.*<\/ds:X509Certificate>/, "")
       document = XMLSecurity::SignedDocument.new(response)
-      expect { document.validate("", "a fingerprint", false) }.to(
+      expect { document.validate("", "a fingerprint", false, signed_element_id: SamlIdp.assertion_id(document)) }.to(
         raise_error(
           SamlIdp::XMLSecurity::SignedDocument::ValidationError,
           "Certificate validation is required, but it doesn't exist."
@@ -58,25 +66,25 @@ module SamlIdp
     it "validate using SHA1" do
       document = XMLSecurity::SignedDocument.new(fixture(:adfs_response_sha1, false))
       base64cert = document.elements["//ds:X509Certificate"].text
-      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72")).to be_truthy
+      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72", true, signed_element_id: SamlIdp.assertion_id(document))).to be_truthy
     end
 
     it "validate using SHA256" do
       document = XMLSecurity::SignedDocument.new(fixture(:adfs_response_sha256, false))
       base64cert = document.elements["//ds:X509Certificate"].text
-      expect(document.validate(base64cert, "28:74:9B:E8:1F:E8:10:9C:A8:7C:A9:C3:E3:C5:01:6C:92:1C:B4:BA")).to be_truthy
+      expect(document.validate(base64cert, "28:74:9B:E8:1F:E8:10:9C:A8:7C:A9:C3:E3:C5:01:6C:92:1C:B4:BA", true, signed_element_id: SamlIdp.assertion_id(document))).to be_truthy
     end
 
     it "validate using SHA384" do
       document = XMLSecurity::SignedDocument.new(fixture(:adfs_response_sha384, false))
       base64cert = document.elements["//ds:X509Certificate"].text
-      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72")).to be_truthy
+      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72", true, signed_element_id: SamlIdp.assertion_id(document))).to be_truthy
     end
 
     it "validate using SHA512" do
       document = XMLSecurity::SignedDocument.new(fixture(:adfs_response_sha512, false))
       base64cert = document.elements["//ds:X509Certificate"].text
-      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72")).to be_truthy
+      expect(document.validate(base64cert, "F1:3C:6B:80:90:5A:03:0E:6C:91:3E:5D:15:FA:DD:B0:16:45:48:72", true, signed_element_id: SamlIdp.assertion_id(document))).to be_truthy
     end
   end
 

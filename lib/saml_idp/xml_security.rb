@@ -35,6 +35,16 @@ module SamlIdp
       ValidationError = Class.new(StandardError)
       C14N = "http://www.w3.org/2001/10/xml-exc-c14n#"
       DSIG = "http://www.w3.org/2000/09/xmldsig#"
+      ENVELOPED_SIG = "http://www.w3.org/2000/09/xmldsig#enveloped-signature"
+      # XMLDSig lets a signature declare arbitrary transforms (XPath filters,
+      # XSLT, ...). We only ever apply "strip the enveloped signature, then
+      # canonicalize", so anything else must be rejected rather than ignored.
+      ALLOWED_TRANSFORMS = [
+        ENVELOPED_SIG,
+        C14N,
+        "http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
+        "http://www.w3.org/2006/12/xml-c14n11"
+      ].freeze
 
       attr_accessor :signed_element_id
 
@@ -43,21 +53,100 @@ module SamlIdp
         extract_signed_element_id
       end
 
-      def validate(idp_base64_cert, idp_cert_fingerprint, soft = true)
-        # get cert from response
-        cert_element = REXML::XPath.first(self, "//ds:X509Certificate", { "ds"=>DSIG })
+      # A signature is only meaningful when it covers the element the caller is
+      # going to read. XMLDSig itself gives no such guarantee: <ds:Reference>
+      # names an element by ID and says nothing about where that element sits in
+      # the document, so a genuinely signed element can be wrapped in attacker
+      # controlled XML that the application reads instead (XML Signature
+      # Wrapping).
+      #
+      # `options[:signed_element_id]` is how the caller states which element it
+      # consumes. The signature is accepted only when it is enveloped in exactly
+      # that element and its single Reference points back at it. Callers that
+      # consume the whole message (every SAML protocol message - see SAML 2.0
+      # Core 5.4.2) can omit the option and get the document root.
+      def validate(idp_base64_cert, idp_cert_fingerprint, soft = true, options = {})
+        document, target, sig_element = signature_context(options)
+        base64_cert = certificate_for(idp_base64_cert, idp_cert_fingerprint, sig_element)
+        validate_signature(base64_cert, document, target, sig_element)
+      rescue ValidationError
+        raise unless soft
+        false
+      end
+
+      def validate_doc(base64_cert, soft = true, options = {})
+        document, target, sig_element = signature_context(options)
+        validate_signature(base64_cert, document, target, sig_element)
+      rescue ValidationError
+        raise unless soft
+        false
+      end
+
+      def fingerprint_cert(cert, sig_element = nil)
+        # pick algorithm based on the doc's digest algorithm
+        digest_method =
+          if sig_element
+            sig_element.at_xpath('./ds:SignedInfo/ds:Reference/ds:DigestMethod', 'ds' => DSIG)
+          else
+            ref_elem = REXML::XPath.first(self, "//ds:Reference", { "ds" => DSIG })
+            REXML::XPath.first(ref_elem, "ds:DigestMethod", { "ds" => DSIG })
+          end
+        algorithm(digest_method).hexdigest(cert.to_der)
+      end
+
+      def fingerprint_cert_sha1(cert)
+        OpenSSL::Digest::SHA1.hexdigest(cert.to_der)
+      end
+
+      private
+
+      # Resolves the element the signature has to cover, together with the
+      # signature enveloped in it. SAML 2.0 Core 5.4.1 requires signatures over
+      # assertions and protocol messages to be enveloped, so the signature is a
+      # child of the element it signs - looking it up through the target rather
+      # than through "the first //ds:Signature in the document" is what keeps
+      # the two halves bound together.
+      def signature_context(options = {})
+        document = Nokogiri.parse(to_s)
+        raise ValidationError.new("Document has no root element") if document.root.nil?
+
+        expected_id = options[:signed_element_id].to_s
+        target =
+          if expected_id.empty?
+            document.root
+          else
+            matches = elements_with_id(document, expected_id)
+            unless matches.length == 1
+              raise ValidationError.new(
+                "Expected exactly one element with ID #{expected_id.inspect}, found #{matches.length}"
+              )
+            end
+            matches.first
+          end
+
+        sig_element = target.at_xpath('./ds:Signature', 'ds' => DSIG)
+        if sig_element.nil?
+          raise ValidationError.new("Signed element mismatch: <#{target.name}> has no enveloped signature")
+        end
+
+        [document, target, sig_element]
+      end
+
+      def certificate_for(idp_base64_cert, idp_cert_fingerprint, sig_element)
+        # get cert from the signature we are about to validate
+        cert_element = sig_element.at_xpath('.//ds:X509Certificate', 'ds' => DSIG)
         if cert_element
           idp_base64_cert = cert_element.text
           cert_text    = Base64.decode64(idp_base64_cert)
           cert         = OpenSSL::X509::Certificate.new(cert_text)
 
           # check cert matches registered idp cert
-          fingerprint = fingerprint_cert(cert)
+          fingerprint = fingerprint_cert(cert, sig_element)
           sha1_fingerprint = fingerprint_cert_sha1(cert)
-          plain_idp_cert_fingerprint = idp_cert_fingerprint.gsub(/[^a-zA-Z0-9]/,"").downcase
+          plain_idp_cert_fingerprint = idp_cert_fingerprint.to_s.gsub(/[^a-zA-Z0-9]/, "").downcase
 
           if fingerprint != plain_idp_cert_fingerprint && sha1_fingerprint != plain_idp_cert_fingerprint
-            return soft ? false : (raise ValidationError.new("Fingerprint mismatch"))
+            raise ValidationError.new("Fingerprint mismatch")
           end
         end
 
@@ -65,82 +154,94 @@ module SamlIdp
           raise ValidationError.new("Certificate validation is required, but it doesn't exist.")
         end
 
-        validate_doc(idp_base64_cert, soft)
+        idp_base64_cert
       end
 
-      def fingerprint_cert(cert)
-        # pick algorithm based on the doc's digest algorithm
-        ref_elem = REXML::XPath.first(self, "//ds:Reference", {"ds"=>DSIG})
-        digest_algorithm = algorithm(REXML::XPath.first(ref_elem, "//ds:DigestMethod"))
-        digest_algorithm.hexdigest(cert.to_der)
-      end
+      def validate_signature(base64_cert, document, target, sig_element)
+        signed_info_element = sig_element.at_xpath('./ds:SignedInfo', 'ds' => DSIG)
+        raise ValidationError.new("SignedInfo is missing") if signed_info_element.nil?
 
-      def fingerprint_cert_sha1(cert)
-        OpenSSL::Digest::SHA1.hexdigest(cert.to_der)
-      end
+        # SAML 2.0 Core 5.4.2: a signature carries exactly one reference, to the
+        # ID of the element being signed.
+        references = signed_info_element.xpath('./ds:Reference', 'ds' => DSIG)
+        unless references.length == 1
+          raise ValidationError.new("Expected exactly one Reference, found #{references.length}")
+        end
+        reference = references.first
 
-      def validate_doc(base64_cert, soft = true)
-        # validate references
+        target_id = target['ID'].to_s
+        raise ValidationError.new("Signed element has no ID") if target_id.empty?
 
-        # check for inclusive namespaces
-        inclusive_namespaces = extract_inclusive_namespaces
+        unless reference['URI'].to_s == "##{target_id}"
+          raise ValidationError.new(
+            "Reference URI #{reference['URI'].inspect} does not cover the signed element"
+          )
+        end
 
-        document = Nokogiri.parse(self.to_s)
+        # An ID has to identify one element, otherwise "the element with this
+        # ID" is ambiguous and the digest can be checked against a different
+        # element than the one we validated.
+        unless elements_with_id(document, target_id).length == 1
+          raise ValidationError.new("Duplicate element ID #{target_id.inspect}")
+        end
 
-        # create a working copy so we don't modify the original
-        @working_copy ||= REXML::Document.new(self.to_s).root
+        transforms = reference.xpath('./ds:Transforms/ds:Transform', 'ds' => DSIG).map { |node| node['Algorithm'] }
+        unless transforms.include?(ENVELOPED_SIG)
+          raise ValidationError.new("Enveloped signature transform is required")
+        end
+        unsupported_transforms = transforms - ALLOWED_TRANSFORMS
+        unless unsupported_transforms.empty?
+          raise ValidationError.new("Unsupported transform(s): #{unsupported_transforms.join(', ')}")
+        end
 
-        # store and remove signature node
-        @sig_element ||= begin
-                           element = REXML::XPath.first(@working_copy, "//ds:Signature", {"ds"=>DSIG})
-                           element.remove
-                         end
+        digest_value_element = reference.at_xpath('./ds:DigestValue', 'ds' => DSIG)
+        raise ValidationError.new("DigestValue is missing") if digest_value_element.nil?
+        digest_value = Base64.decode64(digest_value_element.text)
+        digest_algorithm = algorithm(reference.at_xpath('./ds:DigestMethod', 'ds' => DSIG))
+        digest_canon_algorithm = reference_canon_algorithm(reference, signed_info_element)
 
+        signature_value_element = sig_element.at_xpath('./ds:SignatureValue', 'ds' => DSIG)
+        raise ValidationError.new("SignatureValue is missing") if signature_value_element.nil?
+        signature = Base64.decode64(signature_value_element.text)
+        signature_algorithm = algorithm(signed_info_element.at_xpath('./ds:SignatureMethod', 'ds' => DSIG))
+
+        # canonicalize SignedInfo while the signature is still in place, so that
+        # it sees the namespaces in scope at its original position
+        canon_string = signed_info_element.canonicalize(
+          canon_algorithm(signed_info_element.at_xpath('./ds:CanonicalizationMethod', 'ds' => DSIG))
+        )
+
+        # apply the enveloped-signature transform
+        sig_element.remove
+
+        # check digest
+        canon_hashed_element = target.canonicalize(digest_canon_algorithm, extract_inclusive_namespaces)
+        unless digests_match?(digest_algorithm.digest(canon_hashed_element), digest_value)
+          raise ValidationError.new("Digest mismatch")
+        end
 
         # verify signature
-        signed_info_element     = REXML::XPath.first(@sig_element, "//ds:SignedInfo", {"ds"=>DSIG})
-        noko_sig_element = document.at_xpath('//ds:Signature', 'ds' => DSIG)
-        noko_signed_info_element = noko_sig_element.at_xpath('./ds:SignedInfo', 'ds' => DSIG)
-        canon_algorithm = canon_algorithm REXML::XPath.first(@sig_element, '//ds:CanonicalizationMethod', 'ds' => DSIG)
-        canon_string = noko_signed_info_element.canonicalize(canon_algorithm)
-        noko_sig_element.remove
-
-        # check digests
-        REXML::XPath.each(@sig_element, "//ds:Reference", {"ds"=>DSIG}) do |ref|
-          uri                           = ref.attributes.get_attribute("URI").value
-
-          hashed_element                = document.at_xpath("//*[@ID='#{uri[1..-1]}']")
-          canon_algorithm               = canon_algorithm REXML::XPath.first(ref, '//ds:CanonicalizationMethod', 'ds' => DSIG)
-          canon_hashed_element          = hashed_element.canonicalize(canon_algorithm, inclusive_namespaces)
-
-          digest_algorithm              = algorithm(REXML::XPath.first(ref, "//ds:DigestMethod", {'ds' => DSIG}))
-
-          hash                          = digest_algorithm.digest(canon_hashed_element)
-          digest_value                  = Base64.decode64(REXML::XPath.first(ref, "//ds:DigestValue", {"ds"=>DSIG}).text)
-
-          unless digests_match?(hash, digest_value)
-            return soft ? false : (raise ValidationError.new("Digest mismatch"))
-          end
-        end
-
-        base64_signature        = REXML::XPath.first(@sig_element, "//ds:SignatureValue", {"ds"=>DSIG}).text
-        signature               = Base64.decode64(base64_signature)
-
-        # get certificate object
-        cert_text               = Base64.decode64(base64_cert)
-        cert                    = OpenSSL::X509::Certificate.new(cert_text)
-
-        # signature method
-        signature_algorithm     = algorithm(REXML::XPath.first(signed_info_element, "//ds:SignatureMethod", {"ds"=>DSIG}))
-
+        cert = OpenSSL::X509::Certificate.new(Base64.decode64(base64_cert))
         unless cert.public_key.verify(signature_algorithm.new, signature, canon_string)
-          return soft ? false : (raise ValidationError.new("Key validation error"))
+          raise ValidationError.new("Key validation error")
         end
 
-        return true
+        true
       end
 
-      private
+      def elements_with_id(document, id)
+        document.xpath('//*[@ID]').select { |node| node['ID'] == id }
+      end
+
+      # The canonicalization applied to the referenced element comes from the
+      # Reference's own transforms; SignedInfo's CanonicalizationMethod is only
+      # a fallback for signers that leave it implicit.
+      def reference_canon_algorithm(reference, signed_info_element)
+        transform = reference.xpath('./ds:Transforms/ds:Transform', 'ds' => DSIG).to_a.reverse.find do |node|
+          node['Algorithm'] != ENVELOPED_SIG
+        end
+        canon_algorithm(transform || signed_info_element.at_xpath('./ds:CanonicalizationMethod', 'ds' => DSIG))
+      end
 
       def digests_match?(hash, digest_value)
         hash == digest_value

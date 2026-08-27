@@ -148,7 +148,15 @@ module SamlIdp
     def valid_signature?
       # Force signatures for logout requests because there is no other protection against a cross-site DoS.
       if logout_request? || authn_request? && validate_auth_request_signature?
-        document.valid_signature?(service_provider.cert, service_provider.fingerprint)
+        # Bind the signature to the element we actually read. Without this a
+        # signature over a nested element is enough to make the whole document
+        # look signed, and everything we parse off the outer element is
+        # attacker controlled (XML Signature Wrapping).
+        document.valid_signature?(
+          service_provider.cert,
+          service_provider.fingerprint,
+          signed_element_id: request_id
+        )
       else
         true
       end
@@ -190,16 +198,16 @@ module SamlIdp
     end
 
     def issuer
-      @_issuer ||= xpath("//saml:Issuer", saml: assertion).first.try(:content)
+      @_issuer ||= message_xpath("./saml:Issuer", saml: assertion).try(:content)
       @_issuer if @_issuer.present?
     end
 
     def name_id
-      @_name_id ||= xpath("//saml:NameID", saml: assertion).first.try(:content)
+      @_name_id ||= message_xpath("./saml:NameID", saml: assertion).try(:content)
     end
 
     def session_index
-      @_session_index ||= xpath("//samlp:SessionIndex", samlp: samlp).first.try(:content)
+      @_session_index ||= message_xpath("./samlp:SessionIndex", samlp: samlp).try(:content)
     end
 
     def query_request_string
@@ -223,21 +231,42 @@ module SamlIdp
     private :document
 
     def authn_context_node
-      @_authn_context_node ||= xpath("//samlp:AuthnRequest/samlp:RequestedAuthnContext/saml:AuthnContextClassRef",
+      @_authn_context_node ||= message_xpath("./samlp:RequestedAuthnContext/saml:AuthnContextClassRef",
         samlp: samlp,
-        saml: assertion).first
+        saml: assertion)
     end
     private :authn_context_node
 
     def authn_request
-      @_authn_request ||= xpath("//samlp:AuthnRequest", samlp: samlp).first
+      @_authn_request ||= message_element("AuthnRequest")
     end
     private :authn_request
 
     def logout_request
-      @_logout_request ||= xpath("//samlp:LogoutRequest", samlp: samlp).first
+      @_logout_request ||= message_element("LogoutRequest")
     end
     private :logout_request
+
+    # A SAML protocol message is the root element of its document. Looking it up
+    # with an unanchored `//samlp:AuthnRequest` instead lets an attacker wrap the
+    # real message in one of their own and have us read the outer copy while the
+    # inner one carries the signature.
+    def message_element(name)
+      root = document.root
+      return nil if root.nil?
+      return nil unless root.name == name && root.namespace.try(:href) == samlp
+
+      root
+    end
+    private :message_element
+
+    # Everything we read off a message is read from the message element itself,
+    # never from "anywhere in the document".
+    def message_xpath(path, namespaces)
+      message = request
+      message && message.at_xpath(path, namespaces)
+    end
+    private :message_xpath
 
     def samlp
       Saml::XML::Namespaces::PROTOCOL
