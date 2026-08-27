@@ -5,8 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   </head>
   <body onload="document.forms[0].submit();" style="visibility:hidden;">
-    <%= form_tag(saml_acs_url) do %>
-      <%= hidden_field_tag("SAMLResponse", @saml_response) %>
+    <%= form_tag(@destination || saml_acs_url) do %>
+      <% if @saml_response %>
+        <%= hidden_field_tag("SAMLResponse", @saml_response) %>
+      <% end %>
+      <% if @outgoing_saml_request %>
+        <%= hidden_field_tag("SAMLRequest", @outgoing_saml_request) %>
+      <% end %>
       <%= hidden_field_tag("RelayState", params[:RelayState]) %>
       <%= submit_tag "Submit" %>
     <% end %>

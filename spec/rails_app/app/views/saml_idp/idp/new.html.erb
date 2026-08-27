@@ -6,14 +6,15 @@
   <%= hidden_field_tag("RelayState", params[:RelayState]) %>
   <%= hidden_field_tag("SigAlg", params[:SigAlg]) %>
   <%= hidden_field_tag("Signature", params[:Signature]) %>
+  <%= knob_fields %>
 
   <p>
     <%= label_tag :email %>
-    <%= email_field_tag :email, params[:email], :autocapitalize => "off", :autocorrect => "off", :autofocus => "autofocus", :spellcheck => "false", :size => 30, :class => "email_pwd txt" %>
+    <%= email_field_tag :email, params[:email].presence || 'user@example.test', :autocapitalize => "off", :autocorrect => "off", :autofocus => "autofocus", :spellcheck => "false", :size => 30, :class => "email_pwd txt" %>
   </p>
   <p>
     <%= label_tag :password %>
-    <%= password_field_tag :password, params[:password], :autocapitalize => "off", :autocorrect => "off", :spellcheck => "false", :size => 30, :class => "email_pwd txt" %>
+    <%= password_field_tag :password, params[:password].presence || 'secret', :autocapitalize => "off", :autocorrect => "off", :spellcheck => "false", :size => 30, :class => "email_pwd txt" %>
   </p>
   <p>
     <%= submit_tag "Sign in", :class => "button big blueish" %>

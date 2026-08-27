@@ -1,0 +1,9 @@
+.git
+coverage
+tmp
+log
+*.log
+# Resolved inside the image: the host lock pins platform-specific gems
+# (e.g. darwin nokogiri) that are not installed in the linux image.
+Gemfile.lock
+gemfiles/*.lock
