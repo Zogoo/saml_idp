@@ -1,0 +1,19 @@
+# Runs the suite in a container, identically on a laptop and in CI.
+#
+#   docker compose run --rm test    # everything
+#   docker compose run --rm e2e     # end-to-end SAML flows only
+name: saml-idp
+
+x-suite: &suite
+  build: .
+  environment:
+    LOG_LEVEL: warn
+
+services:
+  test:
+    <<: *suite
+    command: bundle exec rspec
+
+  e2e:
+    <<: *suite
+    command: bundle exec rspec spec/e2e

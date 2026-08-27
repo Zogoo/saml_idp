@@ -49,7 +49,14 @@ jobs:
             gemfile: rails_5.2.gemfile
           - ruby: '3.2'
             gemfile: rails_5.2.gemfile
+          # Rails 5.2 predates Ruby 3 and cannot boot on it (ActionDispatch::Static
+          # arity, MiddlewareStack#operations). These values are matched as exact
+          # strings against the `ruby` list above, so both the bare and the pinned
+          # form are listed -- pinning '3.3' -> '3.3.1' previously re-enabled this
+          # combination silently.
           - ruby: '3.3'
+            gemfile: rails_5.2.gemfile
+          - ruby: '3.3.1'
             gemfile: rails_5.2.gemfile
     runs-on: ubuntu-latest
     env:
