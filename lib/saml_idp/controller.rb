@@ -65,6 +65,8 @@ module SamlIdp
       acs_url = opts[:acs_url] || saml_acs_url
       expiry = opts[:expiry] || 60*60
       session_expiry = opts[:session_expiry]
+      subject_expiry = opts[:subject_expiry]
+      not_before_offset = opts[:not_before_offset]
       encryption_opts = opts[:encryption] || nil
       name_id_formats_opts = opts[:name_id_formats] || nil
       asserted_attributes_opts = opts[:attributes] || nil
@@ -90,6 +92,8 @@ module SamlIdp
         expiry: expiry,
         encryption_opts: encryption_opts,
         session_expiry: session_expiry,
+        subject_expiry: subject_expiry,
+        not_before_offset: not_before_offset,
         name_id_formats_opts: name_id_formats_opts,
         asserted_attributes_opts: asserted_attributes_opts,
         signed_message_opts: signed_message_opts,

@@ -48,7 +48,7 @@ RSpec.describe 'Assertion content' do
       not_on_or_after = Time.parse(result['not_on_or_after'])
 
       expect(not_before).to be < Time.now.utc
-      expect(not_on_or_after - not_before).to be_within(30).of(905)
+      expect(not_on_or_after - not_before).to be_within(30).of(960) # 900 + 60s clock skew
     end
 
     it 'is rejected by the SP once NotOnOrAfter has passed' do

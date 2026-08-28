@@ -46,14 +46,14 @@ module SamlIdp
 
       it "builds a legit raw XML file" do
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"email-address\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"email-address\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
 
     it "builds a legit raw XML file" do
       Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-        expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"email-address\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
+        expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"email-address\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
       end
     end
 
@@ -70,7 +70,7 @@ module SamlIdp
 
       it "doesn't include attribute statement" do
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>")
+          expect(subject.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>")
         end
       end
     end
@@ -92,7 +92,7 @@ module SamlIdp
           expiry: expiry
         )
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
@@ -147,7 +147,7 @@ module SamlIdp
             asserted_attributes_opts: asserted_attributes_opt
         )
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\">unique_identifier_123456</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\">unique_identifier_123456</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
@@ -188,7 +188,7 @@ module SamlIdp
             asserted_attributes_opts: asserted_attributes_opt
         )
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"GivenName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"GivenName\"><AttributeValue>George</AttributeValue></Attribute><Attribute Name=\"SurName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"SurName\"><AttributeValue>Washington</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"GivenName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"GivenName\"><AttributeValue>George</AttributeValue></Attribute><Attribute Name=\"SurName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"SurName\"><AttributeValue>Washington</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
@@ -217,6 +217,144 @@ module SamlIdp
           encryption_opts: encryption_opts
         )
         expect(builder.session_expiry).to eq(8)
+      end
+    end
+
+    describe "with custom not_before_offset configuration" do
+      let(:config) { SamlIdp::Configurator.new }
+
+      it "defaults not_before_offset to 60 seconds from config" do
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry
+        )
+        expect(builder.not_before_offset).to eq(60)
+      end
+
+      it "allows overriding not_before_offset per-request" do
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry,
+          not_before_offset: 60
+        )
+        expect(builder.not_before_offset).to eq(60)
+      end
+
+      it "uses not_before_offset in Conditions NotBefore" do
+        config.not_before_offset = 120
+        config.name_id.formats = { "1.1" => { email_address: ->(p) { p } } }
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry
+        )
+        Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
+          doc = Nokogiri::XML(builder.raw)
+          doc.remove_namespaces!
+          not_before = doc.at_xpath("//Conditions")["NotBefore"]
+          expect(not_before).to eq("2010-06-01T12:58:00Z")
+        end
+      end
+    end
+
+    describe "with custom subject_expiry configuration" do
+      let(:config) { SamlIdp::Configurator.new }
+
+      it "defaults subject_expiry to 15 minutes from config" do
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry
+        )
+        expect(builder.subject_expiry).to eq(15 * 60)
+      end
+
+      it "allows overriding subject_expiry per-request" do
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry,
+          subject_expiry: 5 * 60
+        )
+        expect(builder.subject_expiry).to eq(5 * 60)
+      end
+
+      it "uses subject_expiry in SubjectConfirmationData NotOnOrAfter" do
+        config.subject_expiry = 30 * 60
+        config.name_id.formats = { "1.1" => { email_address: ->(p) { p } } }
+        allow(SamlIdp).to receive(:config).and_return(config)
+        builder = described_class.new(
+          reference_id: reference_id,
+          issuer_uri: issuer_uri,
+          principal: name_id,
+          audience_uri: audience_uri,
+          saml_request_id: saml_request_id,
+          saml_acs_url: saml_acs_url,
+          raw_algorithm: algorithm,
+          authn_context_classref: authn_context_classref,
+          public_cert: sp_encrypted_pv_key[:sp_public_cert],
+          private_key: sp_encrypted_pv_key[:sp_encrypted_pv_key],
+          pv_key_password: sp_encrypted_pv_key[:pv_key_password],
+          expiry: expiry
+        )
+        Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
+          doc = Nokogiri::XML(builder.raw)
+          doc.remove_namespaces!
+          not_on_or_after = doc.at_xpath("//SubjectConfirmationData")["NotOnOrAfter"]
+          expect(not_on_or_after).to eq("2010-06-01T13:30:00Z")
+        end
       end
     end
 
@@ -250,7 +388,7 @@ module SamlIdp
             asserted_attributes_opts: asserted_attributes_opt
         )
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\">unique_identifier_123456</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\">unique_identifier_123456</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"emailAddress\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"emailAddress\"><AttributeValue>foo@example.com</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
@@ -291,7 +429,7 @@ module SamlIdp
             asserted_attributes_opts: asserted_attributes_opt
         )
         Timecop.travel(Time.zone.local(2010, 6, 1, 13, 0, 0)) do
-          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:03:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:55Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"GivenName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"GivenName\"><AttributeValue>George</AttributeValue></Attribute><Attribute Name=\"SurName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"SurName\"><AttributeValue>Washington</AttributeValue></Attribute></AttributeStatement></Assertion>")
+          expect(builder.raw).to eq("<Assertion xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\" ID=\"_abc\" IssueInstant=\"2010-06-01T13:00:00Z\" Version=\"2.0\"><Issuer>http://sportngin.com</Issuer><Subject><NameID Format=\"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\">foo@example.com</NameID><SubjectConfirmation Method=\"urn:oasis:names:tc:SAML:2.0:cm:bearer\"><SubjectConfirmationData InResponseTo=\"123\" NotOnOrAfter=\"2010-06-01T13:15:00Z\" Recipient=\"http://saml.acs.url\"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore=\"2010-06-01T12:59:00Z\" NotOnOrAfter=\"2010-06-01T16:00:00Z\"><AudienceRestriction><Audience>http://example.com</Audience></AudienceRestriction></Conditions><AuthnStatement AuthnInstant=\"2010-06-01T13:00:00Z\" SessionIndex=\"_abc\"><AuthnContext><AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</AuthnContextClassRef></AuthnContext></AuthnStatement><AttributeStatement><Attribute Name=\"GivenName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"GivenName\"><AttributeValue>George</AttributeValue></Attribute><Attribute Name=\"SurName\" NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" FriendlyName=\"SurName\"><AttributeValue>Washington</AttributeValue></Attribute></AttributeStatement></Assertion>")
         end
       end
     end
